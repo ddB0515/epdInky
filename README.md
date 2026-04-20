@@ -2,9 +2,12 @@
 
 ESP32-P4 board for driving RAW E-Ink display panels
 
+![Front Photo](images/epdInkyP4C6.png "Front Photo")
+
 
 
 epdInky is powered by ESP32-P4 and companion ESP32-C6 for WiFi
+
 Other peripherals:
 
 - TPS651851RSLR - PMIC for e-Ink (I2C addr: 0x68)

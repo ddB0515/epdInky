@@ -1,0 +1,366 @@
+#include "soc/soc_caps.h"
+
+#include "esp_check.h"
+#include "esp_log.h"
+#include "esp_lcd_panel_commands.h"
+#include "esp_lcd_panel_interface.h"
+#include "esp_lcd_panel_io.h"
+#include "esp_lcd_mipi_dsi.h"
+#include "esp_lcd_panel_vendor.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "TD4101.h"
+#include "main.h"
+
+typedef struct
+{
+    esp_lcd_panel_io_handle_t io;
+    int reset_gpio_num;
+    const td4101_lcd_init_cmd_t *init_cmds;
+    uint16_t init_cmds_size;
+    uint8_t lane_num;
+    struct
+    {
+        unsigned int reset_level : 1;
+    } flags;
+    // To save the original functions of MIPI DPI panel
+    esp_err_t (*del)(esp_lcd_panel_t *panel);
+    esp_err_t (*init)(esp_lcd_panel_t *panel);
+} td4101_panel_t;
+
+static const char *TAG = "td4101";
+
+static esp_err_t panel_td4101_del(esp_lcd_panel_t *panel);
+static esp_err_t panel_td4101_init(esp_lcd_panel_t *panel);
+static esp_err_t panel_td4101_reset(esp_lcd_panel_t *panel);
+static esp_err_t panel_td4101_invert_color(esp_lcd_panel_t *panel, bool invert_color_data);
+static esp_err_t panel_td4101_disp_on_off(esp_lcd_panel_t *panel, bool on_off);
+
+esp_err_t esp_lcd_new_panel_td4101(const esp_lcd_panel_io_handle_t io, const esp_lcd_panel_dev_config_t *panel_dev_config,
+                                   esp_lcd_panel_handle_t *ret_panel)
+{  
+    ESP_RETURN_ON_FALSE(io && panel_dev_config && ret_panel, ESP_ERR_INVALID_ARG, TAG, "invalid arguments");
+    td4101_vendor_config_t *vendor_config = (td4101_vendor_config_t *)panel_dev_config->vendor_config;
+    ESP_RETURN_ON_FALSE(vendor_config && vendor_config->mipi_config.dpi_config && vendor_config->mipi_config.dsi_bus, ESP_ERR_INVALID_ARG, TAG,
+                        "invalid vendor config");
+
+    esp_err_t ret = ESP_OK;
+    td4101_panel_t *td4101 = (td4101_panel_t *)calloc(1, sizeof(td4101_panel_t));
+    ESP_RETURN_ON_FALSE(td4101, ESP_ERR_NO_MEM, TAG, "no mem for td4101 panel");
+
+    td4101->io = io;
+    td4101->init_cmds = vendor_config->init_cmds;
+    td4101->init_cmds_size = vendor_config->init_cmds_size;
+    td4101->lane_num = vendor_config->mipi_config.lane_num;
+    td4101->reset_gpio_num = panel_dev_config->reset_gpio_num;
+    td4101->flags.reset_level = panel_dev_config->flags.reset_active_high;
+
+    // Create MIPI DPI panel
+    esp_lcd_panel_handle_t panel_handle = NULL;
+    ESP_GOTO_ON_ERROR(esp_lcd_new_panel_dpi(vendor_config->mipi_config.dsi_bus, vendor_config->mipi_config.dpi_config, &panel_handle), err, TAG,
+                      "create MIPI DPI panel failed");
+    ESP_LOGD(TAG, "new MIPI DPI panel @%p", panel_handle);
+
+    // Save the original functions of MIPI DPI panel
+    td4101->del = panel_handle->del;
+    td4101->init = panel_handle->init;
+    // Overwrite the functions of MIPI DPI panel
+    panel_handle->del = panel_td4101_del;
+    panel_handle->init = panel_td4101_init;
+    panel_handle->reset = panel_td4101_reset;
+    panel_handle->invert_color = panel_td4101_invert_color;
+    panel_handle->disp_on_off = panel_td4101_disp_on_off;
+    panel_handle->user_data = td4101;
+    *ret_panel = panel_handle;
+    ESP_LOGD(TAG, "new td4101 panel @%p", td4101);
+
+    return ESP_OK;
+
+err:
+    if (td4101)
+    {
+        if (panel_dev_config->reset_gpio_num >= 0)
+        {
+            gpio_reset_pin(panel_dev_config->reset_gpio_num);
+        }
+        free(td4101);
+    }
+    return ret;
+}
+
+static const td4101_lcd_init_cmd_t vendor_specific_init_code_default[] = {
+        // {cmd, {data}, data_bytes, delay_ms}
+
+    {0xB0, (uint8_t[]){0x04}, 1, 0},
+    {0xB3, (uint8_t[]){0x10,0x00,0x06}, 3, 0},
+    {0xB4, (uint8_t[]){0x00,0x01}, 2, 1},
+
+    {0xB6, (uint8_t[]){0x32,0x53,0x80,0x00,0x00,0x07,0x86}, 7, 0},
+
+    {0xB5, (uint8_t[]){0x00,0x00,0x00,0x00}, 4, 0},
+    {0xB7, (uint8_t[]){0x00}, 1, 0},
+
+    {0xBA, (uint8_t[]){0x07,0x87,0x3A,0x0A,0x3D,0x88}, 6, 0},
+
+    {0xBB, (uint8_t[]){0x00,0xB4,0xA0}, 3, 0},
+    {0xBC, (uint8_t[]){0x00,0xB4,0xA0}, 3, 0},
+    {0xBD, (uint8_t[]){0x00,0xB4,0xA0}, 3, 0},
+
+    {0xBE, (uint8_t[]){0x04}, 1, 0},
+
+    {0xBF, (uint8_t[]){0x02,0x3C,0x80,0x09}, 4, 0},
+
+    {0xC0, (uint8_t[]){
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00
+    }, 17, 0},
+
+    {0xC1, (uint8_t[]){
+        0x04,0x48,0x01,0x03,0x33,0x08,0x11,0x00,0x11,0x00,
+        0x73,0x23,0x23,0x11,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0xDF,0x00,0x30,0x00,
+        0x01,0x00,0x00,0x00
+    }, 34, 0},
+
+    {0xC2, (uint8_t[]){
+        0x00,0xF0,0x03,0xC0,0x0A,0x04,0x08,0x00,0x24,0x19,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x00
+    }, 19, 0},
+
+    {0xC3, (uint8_t[]){
+        0x3D,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x01,0x01,0x03,0x28,0x00,0x01,0x03,0x01,0x44,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xF0,0x00,
+        0x00,0x00,0x00,0x00,0xF0,0x00,0x00,0x00,0x00,0x00,
+        0x40,0x20,0x03
+    }, 63, 0},
+
+    {0xC4, (uint8_t[]){
+        0x70,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x01
+    }, 40, 0},
+
+    {0xC5, (uint8_t[]){
+        0x08,0x00,0x00,0x00,0x00,0x70,0x00,0x00,0x2D,0x41
+    }, 10, 0},
+
+    {0xC6, (uint8_t[]){
+        0xFA,0x54,0xD7,0x00,0x00,0x54,0xD7,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x80,0xFA
+    }, 33, 0},
+
+    {0xC7, (uint8_t[]){
+        0x00,0x0B,0x14,0x22,0x2F,0x38,0x52,0x65,0x75,0x83,
+        0x38,0x43,0x53,0x6E,0x7B,0x87,0x8D,0x96,0xB8,0x00,
+        0x0B,0x14,0x22,0x2F,0x38,0x52,0x65,0x75,0x83,0x38,
+        0x49,0x59,0x6E,0x7B,0x87,0x8D,0x96,0xB8,0x00,0x97,
+        0x00,0x97,0x00,0x97,0x00,0x97
+    }, 46, 0},
+
+    {0xC8, (uint8_t[]){
+        0x00,0x00,0x00,0x00,0x00,0xFC,0x00,0x00,0x00,0x00,
+        0x00,0xFC,0x00,0x00,0x00,0x00,0x00,0xFC,0x00,0x00,
+        0x00,0x00,0x00,0xFC,0x00,0x00,0x00,0x00,0x00,0xFC,
+        0x00,0x00,0x00,0x00,0x00,0xFC,0x00,0x00,0x00,0x00,
+        0x00,0xFC,0x00,0x00,0x00,0x00,0x00,0xFC,0x00,0x00,
+        0x00,0x00,0x00,0xFC,0x00
+    }, 55, 0},
+
+    {0xC9, (uint8_t[]){
+        0x00,0x00,0x00,0x00,0x00,0xFC,0x00,0x00,0x00,0x00,
+        0x00,0xFC,0x00,0x00,0x00,0x00,0x00,0xFC,0x00
+    }, 19, 0},
+
+    {0xCA, (uint8_t[]){
+        0x1D,0xFC,0xFC,0xFC,0x00,0xD9,0xDA,0x70,0x00,0xF0,
+        0x26,0xBA,0x00,0x9A,0x00,0x02,0x39,0xD6,0x00,0xEE,
+        0x00,0x0D,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00
+    }, 43, 0},
+
+    {0xCC, (uint8_t[]){
+        0xD2,0x72,0x46,0x42,0x12,0x16,0x1A,0x1E,0x00,0xD0,
+        0x70,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x70,0xD0,0x00,0x1C,0x18,0x14,0x10,
+        0x40,0x44,0x72,0xD2,0x00
+    }, 45, 0},
+
+    {0xCD, (uint8_t[]){
+        0xD3,0x03,0xF2,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00
+    }, 19, 0},
+
+    {0xCE, (uint8_t[]){
+        0x7D,0x40,0x48,0x56,0x67,0x78,0x88,0x98,0xA7,0xB5,
+        0xC3,0xD1,0xDE,0xE9,0xF2,0xFA,0xFF,0x3C,0x00,0x01,
+        0x04,0x45,0x00,0x00
+    }, 24, 0},
+
+    {0xCF, (uint8_t[]){0x48,0x10}, 2, 0},
+
+    {0xD0, (uint8_t[]){
+        0x11,0x04,0x59,0xE3,0x03,0x10,0x10,0x40,0x19,0x08,
+        0x99,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+    }, 18, 0},
+
+    {0xD1, (uint8_t[]){0x04}, 1, 0},
+
+    {0xD3, (uint8_t[]){
+        0xBB,0x3B,0x33,0x3B,0x44,0x3B,0x44,0x3B,0x00,0x00,
+        0xEC,0x91,0x87,0x23,0x22,0xE7,0xE7,0x3B,0xBB,0x4F,
+        0xD0,0x3C,0x10,0x12,0x10,0x00,0x10
+    }, 27, 0},
+
+    {0xD4, (uint8_t[]){
+        0x80,0x04,0x04,0x33,0x00,0x04,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0A,0x90,
+        0x05,0x00,0x64,0x94
+    }, 24, 0},
+
+    {0xD6, (uint8_t[]){0x41}, 1, 0},
+
+    {0x53, (uint8_t[]){0x0C}, 1, 0},   // BLON
+    {0x5E, (uint8_t[]){0x30}, 1, 0},   // CABC MIN
+    {0x55, (uint8_t[]){0x03}, 1, 0},   // CABC MODE
+
+    {0x11, NULL, 0, 120},              // Sleep Out
+    {0x29, (uint8_t[]){0x00}, 1, 20},
+};
+
+static esp_err_t panel_td4101_del(esp_lcd_panel_t *panel)
+{
+    td4101_panel_t *td4101 = (td4101_panel_t *)panel->user_data;
+
+    if (td4101->reset_gpio_num >= 0)
+    {
+        gpio_reset_pin(td4101->reset_gpio_num);
+    }
+    // Delete MIPI DPI panel
+    td4101->del(panel);
+    ESP_LOGD(TAG, "del td4101 panel @%p", td4101);
+    free(td4101);
+
+    return ESP_OK;
+}
+
+static esp_err_t panel_td4101_init(esp_lcd_panel_t *panel)
+{
+    ESP_LOGI(TAG, "panel_td4101_init called");
+    td4101_panel_t *td4101 = (td4101_panel_t *)panel->user_data;
+    esp_lcd_panel_io_handle_t io = td4101->io;
+    const td4101_lcd_init_cmd_t *init_cmds = NULL;
+    uint16_t init_cmds_size = 0;
+    bool is_cmd_overwritten = false;
+
+    ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_SLPOUT, NULL, 0), TAG,
+                        "io tx param failed");
+    vTaskDelay(pdMS_TO_TICKS(120));
+
+    // vendor specific initialization, it can be different between manufacturers
+    // should consult the LCD supplier for initialization sequence code
+    if (td4101->init_cmds)
+    {
+        init_cmds = td4101->init_cmds;
+        init_cmds_size = td4101->init_cmds_size;
+    }
+    else
+    {
+        init_cmds = vendor_specific_init_code_default;
+        init_cmds_size = sizeof(vendor_specific_init_code_default) / sizeof(td4101_lcd_init_cmd_t);
+    }
+
+    for (int i = 0; i < init_cmds_size; i++)
+    {
+        // Check if the command has been used or conflicts with the internal
+        if (init_cmds[i].data_bytes > 0)
+        {
+            switch (init_cmds[i].cmd)
+            {
+            case LCD_CMD_MADCTL:
+                is_cmd_overwritten = true;
+                break;
+            case LCD_CMD_COLMOD:
+                is_cmd_overwritten = true;
+                break;
+            default:
+                is_cmd_overwritten = false;
+                break;
+            }
+
+            if (is_cmd_overwritten)
+            {
+                is_cmd_overwritten = false;
+                ESP_LOGW(TAG, "The %02Xh command has been used and will be overwritten by external initialization sequence",
+                         init_cmds[i].cmd);
+            }
+        }
+
+        // Send command
+        ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, init_cmds[i].cmd, init_cmds[i].data, init_cmds[i].data_bytes), TAG, "send command failed");
+        vTaskDelay(pdMS_TO_TICKS(init_cmds[i].delay_ms));
+    }
+
+    ESP_RETURN_ON_ERROR(td4101->init(panel), TAG, "init MIPI DPI panel failed");
+
+    return ESP_OK;
+}
+
+static esp_err_t panel_td4101_reset(esp_lcd_panel_t *panel)
+{
+    td4101_panel_t *td4101 = (td4101_panel_t *)panel->user_data;
+    esp_lcd_panel_io_handle_t io = td4101->io;
+
+    // Perform software reset
+    ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_SWRESET, NULL, 0), TAG, "send command failed");
+    vTaskDelay(pdMS_TO_TICKS(120));
+
+    return ESP_OK;
+}
+
+static esp_err_t panel_td4101_invert_color(esp_lcd_panel_t *panel, bool invert_color_data)
+{
+    td4101_panel_t *td4101 = (td4101_panel_t *)panel->user_data;
+    esp_lcd_panel_io_handle_t io = td4101->io;
+    uint8_t command = 0;
+
+    ESP_RETURN_ON_FALSE(io, ESP_ERR_INVALID_STATE, TAG, "invalid panel IO");
+
+    if (invert_color_data)
+    {
+        command = LCD_CMD_INVON;
+    }
+    else
+    {
+        command = LCD_CMD_INVOFF;
+    }
+    ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, command, NULL, 0), TAG, "send command failed");
+
+    return ESP_OK;
+}
+
+static esp_err_t panel_td4101_disp_on_off(esp_lcd_panel_t *panel, bool on_off)
+{
+    td4101_panel_t *td4101 = (td4101_panel_t *)panel->user_data;
+    esp_lcd_panel_io_handle_t io = td4101->io;
+    int command = 0;
+
+    if (on_off)
+    {
+        command = LCD_CMD_DISPON;
+    }
+    else
+    {
+        command = LCD_CMD_DISPOFF;
+    }
+    ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, command, NULL, 0), TAG, "send command failed");
+    return ESP_OK;
+}

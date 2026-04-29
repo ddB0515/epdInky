@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESP32 WebSocket</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 1rem; background: #f6f8fb; color: #222; }
+    #log { background: #fff; border: 1px solid #d0d7de; padding: 0.75rem; height: 50vh; overflow-y: auto; white-space: pre-wrap; }
+    .row { margin: 0.5rem 0; }
+    input { padding: 0.5rem; width: 70%; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 WebSocket</h1>
+  <div class="row">Status: <span id="status">connecting...</span></div>
+  <div id="log"></div>
+  <div class="row">
+    <input id="msg" placeholder="Type a message" />
+    <button id="send">Send</button>
+  </div>
+  <script>
+    const logEl = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+    const inputEl = document.getElementById('msg');
+    const sendBtn = document.getElementById('send');
+
+    const log = (m) => {
+      const atBottom = logEl.scrollHeight - logEl.scrollTop <= logEl.clientHeight + 10;
+      logEl.textContent += m + '\n';
+      if (atBottom) {
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    };
+
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+    ws.onopen = () => { statusEl.textContent = 'connected'; log('WS open'); };
+    ws.onclose = () => { statusEl.textContent = 'closed'; log('WS closed'); };
+    ws.onerror = (e) => { statusEl.textContent = 'error'; log('WS error'); console.error(e); };
+    ws.onmessage = (ev) => { log(`RX: ${ev.data}`); };
+
+    sendBtn.onclick = () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(inputEl.value || 'hello');
+        inputEl.value = '';
+      }
+    };
+    inputEl.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+  </script>
+  <p><a href="/matrix">Open Matrix Editor</a></p>
+</body>
+</html>

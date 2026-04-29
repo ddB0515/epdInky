@@ -1,0 +1,3 @@
+[submodule "examples/epd/matrix_editor/components/FastEPD"]
+	path = examples/epd/matrix_editor/components/FastEPD
+	url = https://github.com/bitbank2/FastEPD.git

@@ -1,0 +1,14 @@
+dependencies:
+  espressif/esp_wifi_remote:
+    version: "*"
+    rules:
+      - if: "target in [esp32p4]"
+  espressif/esp_hosted:
+    version: "*"
+    rules:
+      - if: "target in [esp32p4]"
+  espressif/cjson:
+    version: "^1.7.19~1"
+  FastEPD:
+    version: "*"
+    path: "components/FastEPD"

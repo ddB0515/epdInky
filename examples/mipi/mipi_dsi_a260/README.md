@@ -5,7 +5,7 @@
 
 This example shows the general process of installing a MIPI DSI LCD driver, and displays a LVGL widget on the screen.
 
-
+<img src="https://raw.githubusercontent.com/ddB0515/epdInky/main/images/examples/mipi_dsi_a260_demo.jpg" width="600" />
 
 ### Hardware Required
 
@@ -17,6 +17,7 @@ This example shows the general process of installing a MIPI DSI LCD driver, and 
 ### Hardware Connection
 Check image
 
+<img src="https://raw.githubusercontent.com/ddB0515/epdInky/main/images/examples/mipi_dsi_a260_a260_adapter.jpg" width="300" />
 
 ### Configure
 

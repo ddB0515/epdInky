@@ -5,13 +5,26 @@
 
 This example shows how to use Web GUI for custom Matrix editor needed to make for new panels to get 16 levels (4bit) gray colours.
 
+# Cloning repo
+
+YOu have few ways doing checkout code and compile
+
+```
+git clone --recurse-submodules https://github.com/ddB0515/epdInky.git
+
+or if you have cloned it already (you need to update submodule)
+
+git submodule update --init --recursive
+
+```
+
 
 ## How to use the example
 
 ### Hardware Required
 
 * An epdInky ESP32-P4C6.r2 development board, adapter for eInk panel (check main README.md)
-
+* SDCard needs to be present (as is part of demo) but used for test purposes
 ### Hardware Connection
 
 The connection between epdInky ESP32-P4C6.r2 is provided via 40pin FPC cable to adapter which enable connection to eInk panel

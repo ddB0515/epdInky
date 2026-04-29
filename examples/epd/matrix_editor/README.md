@@ -4,6 +4,18 @@
 # EPD Matrix Editor
 
 This example shows how to use Web GUI for custom Matrix editor needed to make for new panels to get 16 levels (4bit) gray colours.
+<img src="https://raw.githubusercontent.com/ddB0515/epdInky/refs/heads/main/images/examples/matrix_editor_web_ui.png" width="600" />
+
+When run matrix editor on a device you going to be able to change settings in realtime (check image top) and adjust it on the fly
+DEFAULT
+
+<img src="https://raw.githubusercontent.com/ddB0515/epdInky/refs/heads/main/images/examples/matrix_editor_default_panel_bars.jpg" width="600" />
+
+MODIFIED
+
+<img src="https://raw.githubusercontent.com/ddB0515/epdInky/refs/heads/main/images/examples/matrix_editor_modified_panel_bars.jpg" width="600" />
+
+
 
 # Cloning repo
 
@@ -38,6 +50,24 @@ In `main.h` before you build change default WIFI settings to your network so you
 #define EXAMPLE_ESP_WIFI_SSID      "WIFI_SSID"
 #define EXAMPLE_ESP_WIFI_PASS      "WIFI_PASSWORD"
 ```
+To change panel details refer to `epd_functions.c` and change details for your panel
+
+```
+If you are using 8bit panel you have to change board config (BB_PANEL_EPDINKY_P4 or BB_PANEL_EPDINKY_P4_16)
+
+8Bit
+    int rc = bbepInitPanel(&bbep, BB_PANEL_EPDINKY_P4, 20000000); //BB_PANEL_EPDINKY_P4_16
+
+16Bit
+    int rc = bbepInitPanel(&bbep, BB_PANEL_EPDINKY_P4_16, 20000000); //BB_PANEL_EPDINKY_P4_16
+
+```
+Next section is PANEL itself (size W/H and flags) this example I'm using ED113TC1 panel
+```
+bbepSetPanelSize(&bbep, 2400, 1034, BB_PANEL_FLAG_MIRROR_Y, 0); // ED113TC1
+```
+
+after all is done you can BUILD
 
 Run `idf.py menuconfig` and go to `Example Configuration`:
 2 Options needs to be enabled
@@ -55,6 +85,17 @@ The first time you run `idf.py` for the example will cost extra time as the buil
 
 See the [Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html) for full steps to configure and use ESP-IDF to build projects.
 
+
+# USAGE
+
+In my case when connected to WiFI find your IP address and connect to it (in my case was: 192.168.1.82)
+So you need to open
+```
+http://192.168.1.82/matrix
+```
+And you should be on Matrix Editor and ready to modify your example as you wish, once you have your matrix for the panel you could open PR for FastEPD or here
+
+ 
 ### Example Output
 
 ```bash

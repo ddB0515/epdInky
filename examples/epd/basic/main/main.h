@@ -1,0 +1,26 @@
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "esp_system.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "nvs_flash.h"
+
+#include "lwip/err.h"
+#include "lwip/sys.h"
+
+#include "tca6408.h"
+#include "sd_card_functions.h"
+
+#define MOUNT_POINT "/sdcard"
+
+extern i2c_master_bus_handle_t i2c_bus_handle;
+extern tca6408_handle_t tca_board;
+extern tca6408_handle_t tca_display;
+
+#endif // MAIN_H

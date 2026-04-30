@@ -1,0 +1,4 @@
+dependencies:
+  FastEPD:
+    version: "*"
+    path: "components/FastEPD"

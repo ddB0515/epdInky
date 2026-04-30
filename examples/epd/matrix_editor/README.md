@@ -7,6 +7,7 @@ This example shows how to use Web GUI for custom Matrix editor needed to make fo
 <img src="https://raw.githubusercontent.com/ddB0515/epdInky/refs/heads/main/images/examples/matrix_editor_web_ui.png" width="600" />
 
 When run matrix editor on a device you going to be able to change settings in realtime (check image top) and adjust it on the fly
+
 DEFAULT
 
 <img src="https://raw.githubusercontent.com/ddB0515/epdInky/refs/heads/main/images/examples/matrix_editor_default_panel_bars.jpg" width="600" />
@@ -29,7 +30,24 @@ or if you have cloned it already (you need to update submodule)
 git submodule update --init --recursive
 
 ```
+After this step is done you need manually to create one file in component (this is workaround until FastEPD gets IDF component registy)
 
+Put this content into: components/FastEPD/idf_component.yml
+```
+version: "2.0.1"
+description: "Optimized library for driving parallel eink displays with the ESP32"
+url: "https://github.com/bitbank2/FastEPD"
+license: "Apache-2.0 license"
+```
+Without this you will get errors building 
+```
+CMake Error at /home/user/.espressif/v6.0/esp-idf/tools/cmake/build.cmake:695 (message):
+  ERROR: The "path" field in the manifest file
+  "/home/user/epdInky/examples/epd/matrix_editor/main/components/FastEPD/idf_component.yml"
+  does not point to a directory.  You can safely remove this field from the
+  manifest if this project is an example copied from a component repository.
+  The dependency will be downloaded from the ESP component registry.
+```
 
 ## How to use the example
 

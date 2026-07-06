@@ -94,13 +94,16 @@ E-Ink handling is done by [FastEPD](https://github.com/bitbank2/FastEPD/) librar
 
 
 
-List of panels tested and working (keep in mind column 1bit/4bit support)
+List of panels tested and working (keep in mind 4bit support for panels is still WIP and will be some time to do it)
 
 | Panel | Resulution | 8/16bit | Gray levels | Pin count | Tested |
 | ----- | ---------- | ------- | ----------- | --------- | ------ |
-|       |            |         |             |           |        |
-|       |            |         |             |           |        |
-|       |            |         |             |           |        |
+| ED070KH1 | 1680x1264 | 16 bit | 1/2/4 | 40 pin |    1 bit only    |
+| ED097TC2 | 1200x825 | 8 bit | 1/2/4 | 33 pin | 1 bit only |
+| ES133TT3 | 2200x1650 | 16 bit | 1/2/4 | 39 pin | 1 bit only |
+| ED115OC1 | 2760x2070 | 16 bit | 1/2/4 | 40 pin | 1 bit only |
+| ED113TC1| 2400x1034 | 16 bit | 1/2/4 | 50 pin | 1 bit only |
+| ED052TC4 | 1280x720 | 8 bit | 1/2/4 | 50 pin | 1 bit only |
 |       |            |         |             |           |        |
 |       |            |         |             |           |        |
 

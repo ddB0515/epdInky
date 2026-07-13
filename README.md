@@ -2,6 +2,8 @@
 
 ESP32-P4 board for driving RAW E-Ink display panels, epdInky is powered by ESP32-P4 and companion ESP32-C6 for WiFi
 
+If you wanna get one for yourself hop to shop: https://shop.fasani.de/en_US/products/epdinky
+
 ![Front Photo](images/epdInkyP4C6.png "Front Photo")
 
 # Hardware Specifications

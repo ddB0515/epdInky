@@ -77,15 +77,10 @@ If you wanna get one for yourself hop to shop: https://shop.fasani.de/en_US/prod
 ## I2C peripherals:
 
 - TPS651851RSLR - PMIC for e-Ink (I2C addr: 0x68)
-
 - KXTJ3-1057 - 3-axis accelerometar  (I2C addr: 0x0F)
-
 - RV-3028-C7 - RTC (I2C addr: 0x52)
-
 - STC3115AIQT - Fuel guage (I2C addr: 0x70)
-
 - TCA6408ARGTR - GPIO Extender (I2C addr: 0x21)
-
 - TP4056 Battery charger (500mA)
 
 
@@ -96,7 +91,7 @@ E-Ink handling is done by [FastEPD](https://github.com/bitbank2/FastEPD/) librar
 
 
 
-List of panels tested and working (keep in mind 4bit support for panels is still WIP and will be some time to do it)
+List of panels tested and working (keep in mind 2/4bit support for panels is still WIP and will be some time to do it)
 
 | Panel | Resulution | 8/16bit | Gray levels | Pin count | Tested |
 | ----- | ---------- | ------- | ----------- | --------- | ------ |
@@ -106,6 +101,11 @@ List of panels tested and working (keep in mind 4bit support for panels is still
 | ED115OC1 | 2760x2070 | 16 bit | 1/2/4 | 40 pin | 1 bit only |
 | ED113TC1| 2400x1034 | 16 bit | 1/2/4 | 50 pin | 1 bit only |
 | ED052TC4 | 1280x720 | 8 bit | 1/2/4 | 50 pin | 1 bit only |
+| ED060SCN | 800x600 | 8 bit| 1/2/4 | 34 pin | 1 bit only |
+| ED060SCP | 800x600 | 8 bit| 1/2/4 | 34 pin | 1 bit only |
+| ED060SC7 | 800x600 | 8 bit| 1/2/4 | 34 pin | 1 bit only |
+| ET017QG1 |320x240| 8 bit | 1/2/4 | 39 pin| 1 bit only |
 |       |            |         |             |           |        |
 |       |            |         |             |           |        |
+
 

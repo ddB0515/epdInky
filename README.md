@@ -87,7 +87,10 @@ If you wanna get one for yourself hop to shop: https://shop.fasani.de/en_US/prod
 
 Software side:
 
-E-Ink handling is done by [FastEPD](https://github.com/bitbank2/FastEPD/) library and support 8bit mode and 16bit mode
+Currently examples use [FastEPD](https://github.com/bitbank2/FastEPD/) library and plan is to support
+* epdiy
+* TRMNL
+* HA (custom FW)
 
 
 

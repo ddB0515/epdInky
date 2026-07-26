@@ -108,6 +108,8 @@ List of panels tested and working (keep in mind 2/4bit support for panels is sti
 | ED060SCP | 800x600 | 8 bit| 1/2/4 | 34 pin | 1 bit only |
 | ED060SC7 | 800x600 | 8 bit| 1/2/4 | 34 pin | 1 bit only |
 | ET017QG1 |320x240| 8 bit | 1/2/4 | 39 pin| 1 bit only |
+| ED103TC2 | 1872x1404 | 16 bit | 1/2/4 | 40 pin| 1 bit only |
+| ED078KC1 | 1872x1404 | 16 bit | 1/2/4 | 40 pin| 1 bit only |
 |       |            |         |             |           |        |
 |       |            |         |             |           |        |
 

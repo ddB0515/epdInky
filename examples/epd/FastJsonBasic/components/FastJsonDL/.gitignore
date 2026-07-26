@@ -1,0 +1,10 @@
+# idf managed components
+managed_components/
+build/
+
+# IDE
+.vscode
+.DS_Store
+
+# IDF
+sdkconfig.old

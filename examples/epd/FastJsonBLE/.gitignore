@@ -1,0 +1,7 @@
+# Ignore build artifacts and configuration files
+.vscode/*
+build/*
+managed_components/*
+dependencies.lock
+sdkconfig
+sdkconfig.old

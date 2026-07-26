@@ -1,4 +1,4 @@
 dependencies:
   ddb0515/fastepd:
-    version: "2.0.1"
+    version: "2.2.5"
     registry_url: https://components-staging.espressif.com

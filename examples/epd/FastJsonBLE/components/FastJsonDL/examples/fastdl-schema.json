@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/martinberlin/FastJsonDL/schemas/fastjsondl.schema.json",
+  "title": "FastJsonDL Scene Schema v1",
+  "description": "Schema for FastJsonDL JSON scene descriptions rendered with FastEPD.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "description": "Optional schema version. Recommended for forward compatibility.",
+      "type": "integer",
+      "const": 1
+    },
+    "display_bpp": {
+      "description": "Bits per pixel. If omitted, the renderer keeps the active display mode.",
+      "type": "integer",
+      "enum": [1, 2, 4]
+    },
+    "clear": {
+      "description": "When true, clears the framebuffer to white before rendering items.",
+      "type": "boolean"
+    },
+    "items": {
+      "description": "Rendering commands executed sequentially.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "required": ["items"],
+  "$defs": {
+    "color": {
+      "description": "Color/shade value. Valid range depends on display_bpp: 1bpp=0..1, 2bpp=0..3, 4bpp=0..15.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15
+    },
+    "fontName": {
+      "description": "Name of a registered font in the FastJsonDL font registry.",
+      "type": "string",
+      "minLength": 1
+    },
+    "drawString": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "drawString" },
+        "font": { "$ref": "#/$defs/fontName" },
+        "string": {
+          "type": "string",
+          "minLength": 1
+        },
+        "x": { "type": "integer" },
+        "y": {
+          "type": "integer",
+          "description": "Text baseline Y position, not top-left."
+        },
+        "c": { "$ref": "#/$defs/color" }
+      },
+      "required": ["type", "string", "x", "y"]
+    },
+    "fillRect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "fillRect" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "w": { "type": "integer", "minimum": 0 },
+        "h": { "type": "integer", "minimum": 0 },
+        "c": { "$ref": "#/$defs/color" }
+      },
+      "required": ["type", "x", "y", "w", "h"]
+    },
+    "drawRect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "drawRect" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "w": { "type": "integer", "minimum": 0 },
+        "h": { "type": "integer", "minimum": 0 },
+        "c": { "$ref": "#/$defs/color" }
+      },
+      "required": ["type", "x", "y", "w", "h"]
+    },
+    "drawLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "drawLine" },
+        "x1": { "type": "integer" },
+        "y1": { "type": "integer" },
+        "x2": { "type": "integer" },
+        "y2": { "type": "integer" },
+        "c": { "$ref": "#/$defs/color" }
+      },
+      "required": ["type", "x1", "y1", "x2", "y2"]
+    },
+    "fillCircle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "fillCircle" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "r": { "type": "integer", "minimum": 0 },
+        "c": { "$ref": "#/$defs/color" }
+      },
+      "required": ["type", "x", "y", "r"]
+    },
+    "drawCircle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "drawCircle" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "r": { "type": "integer", "minimum": 0 },
+        "c": { "$ref": "#/$defs/color" }
+      },
+      "required": ["type", "x", "y", "r"]
+    },
+    "item": {
+      "oneOf": [
+        { "$ref": "#/$defs/drawString" },
+        { "$ref": "#/$defs/fillRect" },
+        { "$ref": "#/$defs/drawRect" },
+        { "$ref": "#/$defs/drawLine" },
+        { "$ref": "#/$defs/fillCircle" },
+        { "$ref": "#/$defs/drawCircle" }
+      ]
+    }
+  }
+}

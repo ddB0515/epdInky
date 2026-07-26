@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="168mm"
+   height="40mm"
+   viewBox="0 0 168 40"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   sodipodi:docname="fastjsondl.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.7538129"
+     inkscape:cx="309.89623"
+     inkscape:cy="112.0416"
+     inkscape:window-width="1712"
+     inkscape:window-height="970"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       d="M 15.431881,15.789937 -0.28172626,14.353786 H 15.728364 Z M 16.061906,12.726148 0.34830034,11.289998 H 16.358389 Z M 16.691933,9.6623594 0.97832707,8.226208 H 16.988416 Z M 17.32196,6.5985703 1.6083537,5.1624194 H 17.581382 Z M 17.914926,3.5347807 2.2383804,2.0986297 H 18.211409 Z"
+       style="font-weight:bold;font-size:50.8px;line-height:1.25;font-family:'Faster One';-inkscape-font-specification:'Faster One Bold';letter-spacing:0px;word-spacing:0px;fill:#d40000;stroke-width:0.179122"
+       id="path83072"
+       sodipodi:nodetypes="cccccccccccccccccccc" />
+    <g
+       aria-label="FastEPD"
+       id="text18386"
+       style="font-weight:bold;font-size:35.2778px;font-family:NTR;-inkscape-font-specification:'NTR Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       inkscape:export-filename="/home/martin/Documents/Design/FastEPD/FastEPD.png"
+       inkscape:export-xdpi="102.918"
+       inkscape:export-ydpi="102.918"
+       transform="matrix(0.58670305,0,0,0.58670305,1.0572971,-2.5176554)">
+      <text
+         xml:space="preserve"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:36.0773px;font-family:'PT Sans';-inkscape-font-specification:'PT Sans Bold Italic';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;stroke:#808080;stroke-width:0.119318;stroke-linejoin:bevel"
+         x="29.522017"
+         y="31.645123"
+         id="text1"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:36.0773px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium Italic';fill:#999999;stroke-width:0.119318"
+           x="29.522017"
+           y="31.645123"><tspan
+             style="fill:#a02c2c"
+             id="tspan8">{</tspan><tspan
+             style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:36.0773px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium Italic';fill:#a02c2c"
+             id="tspan2"><tspan
+               style="fill:#de8787"
+               id="tspan9">&quot;</tspan><tspan
+               style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:36.0773px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium Italic';fill:#1a1a1a"
+               id="tspan6">Fast</tspan><tspan
+               style="fill:#de8787"
+               id="tspan10">&quot;</tspan></tspan><tspan
+             style="fill:#666666"
+             id="tspan11">:</tspan><tspan
+             style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:36.0773px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium Italic';fill:#de8787"
+             id="tspan4">&quot;</tspan><tspan
+             style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:36.0773px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium Italic';fill:#1a1a1a"
+             id="tspan7">DL</tspan><tspan
+             style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:36.0773px;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Medium Italic';fill:#de8787"
+             id="tspan5">&quot;</tspan><tspan
+             style="fill:#a02c2c"
+             id="tspan12">}</tspan></tspan></text>
+    </g>
+    <path
+       d="M 11.958175,30.142273 -0.67893858,28.80107 H 12.196611 Z M 12.464851,27.281039 -0.17226188,25.939837 H 12.703287 Z M 12.971528,24.419806 0.33441492,23.078602 H 13.209964 Z M 13.478205,21.558572 0.84109162,20.217369 H 13.686836 Z M 13.955077,18.697338 1.3477684,17.356135 H 14.193513 Z"
+       style="font-weight:bold;font-size:50.8px;line-height:1.25;font-family:'Faster One';-inkscape-font-specification:'Faster One Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.155232;fill:#ffffff"
+       id="path83072-3"
+       sodipodi:nodetypes="cccccccccccccccccccc" />
+  </g>
+</svg>

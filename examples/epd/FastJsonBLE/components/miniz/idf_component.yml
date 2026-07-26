@@ -1,0 +1,4 @@
+version: "1.0.0"
+description: "Copy of miniz, modified to use psram if available on an esp32"
+url: "https://github.com/martinberlin/miniz-esp32"
+license: "MIT"

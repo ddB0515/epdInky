@@ -7,8 +7,7 @@ dependencies:
     version: "*"
     rules:
       - if: "target in [esp32p4]"
-  espressif/cjson:
-    version: "^1.7.19~1"
+  espressif/cjson: "^1.7.19"
   ddb0515/fastepd:
-    version: "2.2.5"
+    version: "2.2.2"
     registry_url: https://components-staging.espressif.com

@@ -38,6 +38,8 @@ static const char *TAG = "eInky-P4";
 #define I2C_MASTER_SDA_IO           28      /*!< GPIO number for I2C master data  */
 #define I2C_MASTER_NUM              I2C_NUM_0 /*!< I2C master i2c port number */
 
+#define KEEP_ON                     0
+
 i2c_master_bus_handle_t i2c_bus_handle = NULL;
 tca6408_handle_t tca_board = NULL;
 tca6408_handle_t tca_display = NULL;
@@ -156,7 +158,7 @@ static void demo_fonts(void)
     bbepWriteString(&bbep, margin, y,
                     "FastEPD font demo", FONT_8x8, BBEP_BLACK);
 
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
     vTaskDelay(pdMS_TO_TICKS(5000));
 }
 
@@ -287,7 +289,7 @@ static void demo_shapes(void)
     bbepEllipse(&bbep, cx, cy, rx*6/10, ry*6/10, 0xff, BBEP_BLACK, 0);
     bbepEllipse(&bbep, cx, cy, rx*3/10, ry*3/10, 0xff, BBEP_BLACK, 1);
 
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
     vTaskDelay(pdMS_TO_TICKS(5000));
 }
 
@@ -352,7 +354,7 @@ static void demo_partial_update(void)
                     "ZONE 3 - SHAPE", FONT_12x16, BBEP_BLACK);
     bbepEllipse(&bbep, scx, scy, sr, sr, 0xff, BBEP_BLACK, 0);
 
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
     vTaskDelay(pdMS_TO_TICKS(1500));
 
     /* ------------------------------------------------------------------ */
@@ -369,7 +371,7 @@ static void demo_partial_update(void)
         snprintf(buf, sizeof(buf), "%d", step);
         bbepWriteStringCustom(&bbep, Roboto_Black_80,
                               w / 2 - margin * 3, zy[0] + zh[0] - 35, buf, BBEP_BLACK);
-        bbepPartialUpdate(&bbep, 0, zy[0], zy[0] + zh[0] - 1);
+        bbepPartialUpdate(&bbep, KEEP_ON, zy[0], zy[0] + zh[0] - 1);
         vTaskDelay(pdMS_TO_TICKS(1500));
 
         /* === Zone 1: progress bar fills up === */
@@ -385,7 +387,7 @@ static void demo_partial_update(void)
                           bar_x + fill, bar_y + bar_h - 1, BBEP_BLACK, 1);
         snprintf(buf, sizeof(buf), "%d%%  < refreshing", step * 33 + (step == 3 ? 1 : 0));
         bbepWriteString(&bbep, bar_x, bar_y - zh[1] / 10, buf, FONT_12x16, BBEP_BLACK);
-        bbepPartialUpdate(&bbep, 0, zy[1], zy[1] + zh[1] - 1);
+        bbepPartialUpdate(&bbep, KEEP_ON, zy[1], zy[1] + zh[1] - 1);
         vTaskDelay(pdMS_TO_TICKS(1500));
 
         /* === Zone 2: shape morphs each step === */
@@ -410,7 +412,7 @@ static void demo_partial_update(void)
             bbepEllipse(&bbep, scx, scy, sr / 4, sr / 4, 0xff, BBEP_BLACK, 1);
             bbepWriteString(&bbep, w * 7 / 10, scy - margin, "round rect", FONT_12x16, BBEP_BLACK);
         }
-        bbepPartialUpdate(&bbep, 0, zy[2], zy[2] + zh[2] - 1);
+        bbepPartialUpdate(&bbep, KEEP_ON, zy[2], zy[2] + zh[2] - 1);
         vTaskDelay(pdMS_TO_TICKS(1500));
     }
 }
@@ -445,7 +447,7 @@ static void demo_full_update(void)
     bbepWriteString(&bbep, margin, h / 2 - h / 20,
                     "Checkerboard stress pattern", FONT_12x16, BBEP_WHITE);
 
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
     vTaskDelay(pdMS_TO_TICKS(2000));
 
     /* --- clear with CLEAR_FAST and show result --- */
@@ -458,7 +460,7 @@ static void demo_full_update(void)
                   w - margin * 2, h / 5,
                   w / 40, BBEP_BLACK, 0);
 
-    bbepFullUpdate(&bbep, CLEAR_FAST, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_FAST, KEEP_ON, NULL);
     vTaskDelay(pdMS_TO_TICKS(2500));
 
     /* --- clear with CLEAR_SLOW and show result --- */
@@ -471,7 +473,7 @@ static void demo_full_update(void)
                   w - margin * 2, h / 5,
                   w / 40, BBEP_BLACK, 0);
 
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
     vTaskDelay(pdMS_TO_TICKS(2500));
 }
 
@@ -497,13 +499,33 @@ void app_main(void)
     }
 
     // Change for your panel size and orientation here if needed
-    bbepSetPanelSize(&bbep, 2400, 1034, BB_PANEL_FLAG_MIRROR_Y, -1000);
-    //bbepSetPanelSize(&bbep, 1264, 1680, BB_PANEL_FLAG_NONE, -1400);
-    //bbepSetPanelSize(&bbep, 1200, 825, BB_PANEL_FLAG_NONE, -1620);
+    // bbepSetPanelSize(&bbep, 2400, 1034, BB_PANEL_FLAG_MIRROR_Y, -1000);  // ED113TC1
+    // bbepSetPanelSize(&bbep, 1264, 1680, BB_PANEL_FLAG_MIRROR_Y | BB_PANEL_FLAG_MIRROR_X, -1400); // ED070KH1
+    // bbepSetPanelSize(&bbep, 1200, 825, BB_PANEL_FLAG_NONE, -1620);   // ED097TC1/2
+    // bbepSetPanelSize(&bbep, 2200, 1650, BB_PANEL_FLAG_NONE, -1890);  // ES133TT3
+    // bbepSetPanelSize(&bbep, 2760, 2070, BB_PANEL_FLAG_NONE, -1340);  // ED115OC1
+    // bbepSetPanelSize(&bbep, 320, 240, BB_PANEL_FLAG_NONE, -3250);    // ET017QG1
+    // bbepSetPanelSize(&bbep, 1800, 900, BB_PANEL_FLAG_NONE, -2470);   // ED067KC1 (WIP)
+    // bbepSetPanelSize(&bbep, 1280, 720, BB_PANEL_FLAG_MIRROR_X, -2500);   // ED052TC4
+    // bbepSetPanelSize(&bbep, 800, 600, BB_PANEL_FLAG_NONE, -1600);    // ED060XX (multiple variants)
+    // bbepSetPanelSize(&bbep, 1024, 768, BB_PANEL_FLAG_NONE, -1600);   // ED060XD4
+    bbepSetPanelSize(&bbep, 1872, 1404, BB_PANEL_FLAG_MIRROR_Y, -1200); // ED103TC2
+    // bbepSetPanelSize(&bbep, 1920, 1080, BB_PANEL_FLAG_NONE, -1600); // ES108FC2 (WIP)
+    // bbepSetPanelSize(&bbep, 1872, 1404, BB_PANEL_FLAG_MIRROR_Y | BB_PANEL_FLAG_MIRROR_X, -1870); // ED078KC1
+
 
     /* Initial full clear */
     bbepFillScreen(&bbep, BBEP_WHITE);
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
+
+    // bbepDrawLine(&bbep, 0, 0, bbep.width - 1, bbep.height - 1, BBEP_BLACK);
+    // bbepDrawLine(&bbep, 0, bbep.height - 1, bbep.width - 1, 0, BBEP_BLACK);
+    // bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    // vTaskDelay(pdMS_TO_TICKS(2000));
+
+        /* Initial full clear */
+    bbepFillScreen(&bbep, BBEP_WHITE);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
 
     /* Run the four demos back-to-back */
     demo_fonts();
@@ -518,5 +540,5 @@ void app_main(void)
                           "Demo complete.", BBEP_BLACK);
     bbepWriteString(&bbep, bbep.width / 20, bbep.height / 3 + bbep.height / 8,
                     "FastEPD on epdInky P4", FONT_16x16, BBEP_BLACK);
-    bbepFullUpdate(&bbep, CLEAR_SLOW, 0, NULL);
+    bbepFullUpdate(&bbep, CLEAR_SLOW, KEEP_ON, NULL);
 }
